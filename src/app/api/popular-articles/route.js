@@ -9,23 +9,19 @@ export async function GET() {
       throw new Error('Missing NEWS_API_KEY');
     }
 
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-    const newsApiUrl = `${proxyUrl}https://newsapi.org/v2/top-headlines?country=us&apiKey=${newsApiKey}`;
+    // Backend server-to-server request to the NewsAPI
+    const newsApiUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${newsApiKey}`;
 
-    // Request options for CORS proxy
-    const response = await axios.get(newsApiUrl, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    });
+    // Make the request from the backend to bypass CORS issues
+    const response = await axios.get(newsApiUrl);
 
+    // Map the articles from the response
     const articles = response.data.articles.map(article => ({
       title: article.title,
       description: article.description,
       url: article.url,
       imageUrl: article.urlToImage,
-      source: article.source.name
+      source: article.source.name,
     }));
 
     return NextResponse.json(articles);
