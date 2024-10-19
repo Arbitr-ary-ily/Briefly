@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { combineArticles } from '@/lib/geminiAI'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -28,6 +28,7 @@ export default function AdvancedStoryboardEditor() {
   const [loading, setLoading] = useState(false)
   const [publishDate, setPublishDate] = useState(null)
   const [selectedArticles, setSelectedArticles] = useState([])
+  const router = useRouter()
 
   useEffect(() => {
     const savedStoryboard = JSON.parse(localStorage.getItem(`storyboard-${uuid}`)) || { title: 'Untitled Storyboard', sections: [] }
@@ -73,13 +74,45 @@ export default function AdvancedStoryboardEditor() {
     localStorage.setItem(`storyboard-${uuid}`, JSON.stringify({ title, sections, articles }))
   }, [uuid, title, sections, articles])
 
-  const handlePublish = () => {
-    setPublishDate(new Date().toLocaleString())
-    toast({
-      title: "Published",
-      description: "Your storyboard has been published successfully.",
-    })
-  }
+  const handlePublish = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/publish-storyboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          content: JSON.stringify(sections),
+          sourceArticles: JSON.stringify(selectedArticles),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to publish storyboard');
+      }
+
+      const { slug } = await response.json();
+      setPublishDate(new Date().toLocaleString());
+      toast({
+        title: "Published",
+        description: "Your story has been published successfully.",
+      });
+      
+      // Redirect to the public story page
+      router.push(`/story/${slug}`);
+    } catch (error) {
+      console.error('Error publishing story:', error);
+      toast({
+        title: "Error",
+        description: "Failed to publish story. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -149,9 +182,13 @@ export default function AdvancedStoryboardEditor() {
             placeholder="Enter storyboard title..."
           />
           <div className="flex space-x-3">
-            <Button onClick={handlePublish} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Publish
+            <Button onClick={handlePublish} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
+              {loading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4 mr-2" />
+              )}
+              {loading ? 'Publishing...' : 'Publish'}
             </Button>
             <Button onClick={handleCopyLink} variant="outline" size="lg" className="text-foreground">
               <Share2 className="w-4 h-4 mr-2" />
