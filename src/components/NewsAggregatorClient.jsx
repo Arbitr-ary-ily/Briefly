@@ -23,6 +23,9 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Image from 'next/image';
 import { SiGooglegemini } from "react-icons/si";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import StoryboardSidebar from './StoryboardSidebar';
 
 const categories = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];
 
@@ -44,6 +47,8 @@ const NewsAggregator = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [isInputFocused, setIsInputFocused] = useState(false); // New state for input focus
+  const [selectedArticles, setSelectedArticles] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (isLoaded && isSignedIn && !hasOnboardingChecked) {
@@ -296,6 +301,19 @@ const NewsAggregator = () => {
     );
   };
 
+  const handleArticleSelect = useCallback((article) => {
+    setSelectedArticles((prev) => {
+      const updatedArticles = prev.some((a) => a.url === article.url)
+        ? prev.filter((a) => a.url !== article.url)
+        : [...prev, article];
+
+      // Store selected articles in local storage
+      localStorage.setItem('selectedArticles', JSON.stringify(updatedArticles));
+      return updatedArticles;
+    });
+    setIsSidebarOpen(true);
+  }, []);
+
   if (!isLoaded || !isSignedIn) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -309,286 +327,298 @@ const NewsAggregator = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <header className="flex flex-col sm:flex-row items-center justify-between mb-8 space-y-4 sm:space-y-0">
-        <motion.h1 
-          className="text-3xl font-bold flex items-center mt-1"
-          whileHover={{ scale: 1.05 }}
-        >
-          <Image src="/logo.svg" alt="Briefly" className="mr-2 cursor-pointer" width='200' height='500' onClick={() => window.location.reload()} />
-        </motion.h1>
-        <div className="flex items-center space-x-4">
-          <div className="flex w-full sm:w-auto space-x-2">
-            <div className="relative w-full">
-              <Input
-                type="text"
-                placeholder="Search news..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onFocus={() => setIsInputFocused(true)} // Set focus state to true
-                onBlur={() => setIsInputFocused(false)} // Set focus state to false
-                className="flex-grow"
-              />
-              <AnimatePresence>
-                {isInputFocused && searchSuggestions.length > 0 && ( // Check if input is focused
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute z-10 w-full bg-background border rounded-md shadow-lg"
-                  >
-                    {searchSuggestions.map((suggestion, index) => (
-                      <motion.div
-                        key={index}
-                        className="px-4 py-2 hover:bg-accent cursor-pointer"
-                        whileHover={{ backgroundColor: 'var(--accent)' }}
+    <DndProvider backend={HTML5Backend}>
+      <div className="container mx-auto px-4 py-8 relative">
+        <header className="flex flex-col sm:flex-row items-center justify-between mb-8 space-y-4 sm:space-y-0">
+          <motion.h1 
+            className="text-3xl font-bold flex items-center mt-1"
+            whileHover={{ scale: 1.05 }}
+          >
+            <Image src="/logo.svg" alt="Briefly" className="mr-2 cursor-pointer" width='200' height='500' onClick={() => window.location.reload()} />
+          </motion.h1>
+          <div className="flex items-center space-x-4">
+            <div className="flex w-full sm:w-auto space-x-2">
+              <div className="relative w-full">
+                <Input
+                  type="text"
+                  placeholder="Search news..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onFocus={() => setIsInputFocused(true)} // Set focus state to true
+                  onBlur={() => setIsInputFocused(false)} // Set focus state to false
+                  className="flex-grow"
+                />
+                <AnimatePresence>
+                  {isInputFocused && searchSuggestions.length > 0 && ( // Check if input is focused
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-10 w-full bg-background border rounded-md shadow-lg"
+                    >
+                      {searchSuggestions.map((suggestion, index) => (
+                        <motion.div
+                          key={index}
+                          className="px-4 py-2 hover:bg-accent cursor-pointer"
+                          whileHover={{ backgroundColor: 'var(--accent)' }}
+                          onClick={() => {
+                            setSearchTerm(suggestion);
+                            setSearchSuggestions([]);
+                            handleSearch();
+                          }}
+                        >
+                          {suggestion}
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={handleSearch} disabled={loading}>
+                      <Search className="mr-2" />
+                      Search
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Search for news articles</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" onClick={handleRefresh} disabled={loading}>
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Refresh news</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" onClick={toggleAiInsights}>
+                      <SiGooglegemini className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Toggle AI Insights</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <UserButton afterSignOutUrl="/" />
+          </div>
+        </header>
+
+        <main className="flex flex-col lg:flex-row">
+          <div className={`flex-grow ${showAiInsights ? 'lg:w-2/3' : 'w-full'} transition-all duration-300`}>
+            <div className="flex justify-between items-center mb-4">
+              <motion.h2 
+                className="text-2xl font-semibold"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                {isTopHeadlines ? 'Top Headlines' : 'Search Results'}
+              </motion.h2>
+              <div className="flex space-x-2">
+                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Items per page" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="20">20 per page</SelectItem>
+                    <SelectItem value="50">50 per page</SelectItem>
+                    <SelectItem value="100">100 per page</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {recommendations.length > 0 && (
+              <motion.div 
+                className="mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <h3 className="text-lg font-semibold mb-2">Trending Topics:</h3>
+                <div className="flex flex-wrap gap-2">
+                  {recommendations.map((rec, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Badge
+                        variant="secondary"
+                        className="cursor-pointer"
                         onClick={() => {
-                          setSearchTerm(suggestion);
-                          setSearchSuggestions([]);
+                          setSearchTerm(rec);
                           handleSearch();
                         }}
                       >
-                        {suggestion}
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button onClick={handleSearch} disabled={loading}>
-                    <Search className="mr-2" />
-                    Search
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Search for news articles</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" onClick={handleRefresh} disabled={loading}>
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Refresh news</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" onClick={toggleAiInsights}>
-                    <SiGooglegemini className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Toggle AI Insights</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <UserButton afterSignOutUrl="/" />
-        </div>
-      </header>
-
-      <main className="flex flex-col lg:flex-row">
-        <div className={`flex-grow ${showAiInsights ? 'lg:w-2/3' : 'w-full'} transition-all duration-300`}>
-          <div className="flex justify-between items-center mb-4">
-            <motion.h2 
-              className="text-2xl font-semibold"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              {isTopHeadlines ? 'Top Headlines' : 'Search Results'}
-            </motion.h2>
-            <div className="flex space-x-2">
-              <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
+                        {rec}
+                      </Badge>
+                    </motion.div>
                   ))}
-                </SelectContent>
-              </Select>
-              <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Items per page" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="20">20 per page</SelectItem>
-                  <SelectItem value="50">50 per page</SelectItem>
-                  <SelectItem value="100">100 per page</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+                </div>
+              </motion.div>
+            )}
 
-          {recommendations.length > 0 && (
-            <motion.div 
-              className="mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <h3 className="text-lg font-semibold mb-2">Trending Topics:</h3>
-              <div className="flex flex-wrap gap-2">
-                {recommendations.map((rec, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Badge
-                      variant="secondary"
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setSearchTerm(rec);
-                        handleSearch();
-                      }}
-                    >
-                      {rec}
-                    </Badge>
-                  </motion.div>
+            {loading && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(itemsPerPage)].map((_, index) => (
+                  <Card key={index} className="flex flex-col h-full">
+                    <CardHeader>
+                      <Skeleton className="h-6 w-3/4" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="h-4 w-1/4 mb-2" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center">
+                      <Skeleton className="h-6 w-16" />
+                      <Skeleton className="h-8 w-24" />
+                    </CardFooter>
+                  </Card>
                 ))}
               </div>
-            </motion.div>
-          )}
+            )}
 
-          {loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(itemsPerPage)].map((_, index) => (
-                <Card key={index} className="flex flex-col h-full">
-                  <CardHeader>
-                    <Skeleton className="h-6 w-3/4" />
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {!loading && !error && (
+              <AnimatePresence>
+                <motion.div 
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ staggerChildren: 0.1 }}
+                >
+                  {articles && articles.length > 0 ? (
+                    articles.map((article, index) => (
+                      <motion.div
+                        key={article.url || index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <ArticleCard article={article} onSelect={handleArticleSelect} />
+                      </motion.div>))
+                  ) : (
+                    <p>No articles found.</p>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            )}
+
+            {totalItems > itemsPerPage && (
+              <motion.div 
+                className="mt-8 flex justify-center items-center space-x-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <span className="text-sm font-medium">
+                  Page {currentPage} of {Math.ceil(totalItems / itemsPerPage)}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === Math.ceil(totalItems / itemsPerPage)}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </motion.div>
+            )}
+          </div>
+
+          <AnimatePresence>
+            {showAiInsights && (
+              <motion.div 
+                className="lg:w-1/3 mt-8 lg:mt-0 lg:ml-8"
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 100 }}
+                transition={{ 
+                  type: 'spring', 
+                  stiffness: 300, 
+                  damping: 30,
+                  duration: 0.3
+                }}
+              >
+                <Card className="sticky top-4">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div className="flex items-center">
+                      <SiGooglegemini className="h-6 w-6 mr-2" />
+                      <CardTitle>AI Insights</CardTitle>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={toggleAiInsights}>
+                      <X className="h-4 w-4" />
+                    </Button>
                   </CardHeader>
                   <CardContent>
-                    <Skeleton className="h-4 w-1/4 mb-2" />
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-2/3" />
+                    <ScrollArea className="h-[calc(100vh-200px)]">
+                      {renderAiInsights(aiInsights)}
+                    </ScrollArea>
                   </CardContent>
-                  <CardFooter className="flex justify-between items-center">
-                    <Skeleton className="h-6 w-16" />
-                    <Skeleton className="h-8 w-24" />
-                  </CardFooter>
                 </Card>
-              ))}
-            </div>
-          )}
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {!loading && !error && (
-            <AnimatePresence>
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ staggerChildren: 0.1 }}
-              >
-                {articles && articles.length > 0 ? (
-                  articles.map((article, index) => (
-                    <motion.div
-                      key={article.url || index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <ArticleCard article={article} />
-                    </motion.div>))
-                ) : (
-                  <p>No articles found.</p>
-                )}
               </motion.div>
-            </AnimatePresence>
-          )}
-
-          {totalItems > itemsPerPage && (
-            <motion.div 
-              className="mt-8 flex justify-center items-center space-x-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </Button>
-              <span className="text-sm font-medium">
-                Page {currentPage} of {Math.ceil(totalItems / itemsPerPage)}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === Math.ceil(totalItems / itemsPerPage)}
-              >
-                Next
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </motion.div>
-          )}
-        </div>
+            )}
+          </AnimatePresence>
+        </main>
 
         <AnimatePresence>
-          {showAiInsights && (
-            <motion.div 
-              className="lg:w-1/3 mt-8 lg:mt-0 lg:ml-8"
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 100 }}
-              transition={{ 
-                type: 'spring', 
-                stiffness: 300, 
-                damping: 30,
-                duration: 0.3
-              }}
-            >
-              <Card className="sticky top-4">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div className="flex items-center">
-                    <SiGooglegemini className="h-6 w-6 mr-2" />
-                    <CardTitle>AI Insights</CardTitle>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={toggleAiInsights}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[calc(100vh-200px)]">
-                    {renderAiInsights(aiInsights)}
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </motion.div>
+          {isSidebarOpen && (
+            <StoryboardSidebar
+              selectedArticles={selectedArticles}
+              onArticleSelect={handleArticleSelect}
+              onClose={() => setIsSidebarOpen(false)}
+            />
           )}
         </AnimatePresence>
-      </main>
-    </div>
+      </div>
+    </DndProvider>
   );
 };
 
