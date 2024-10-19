@@ -22,7 +22,7 @@ export default function OnboardingPage() {
       if (!isSignedIn) {
         router.push('/sign-in');
       } else if (user.unsafeMetadata.onboardingCompleted) {
-        router.push('/news');
+        router.push('/dashboard');
       } else {
         setUserData({
           displayName: user.unsafeMetadata.displayName || '',
@@ -59,7 +59,7 @@ export default function OnboardingPage() {
             interests: userData.interests,
           },
         });
-        router.push('/news');
+        router.push('/dashboard');
       } catch (error) {
         console.error('Failed to complete onboarding:', error);
         alert('Failed to complete onboarding. Please try again.');

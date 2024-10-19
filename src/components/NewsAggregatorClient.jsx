@@ -65,30 +65,57 @@ const NewsAggregator = () => {
     }
   }, [isLoaded, isSignedIn, user, router, hasOnboardingChecked]);
 
-  const fetchTopHeadlines = async () => {
+  const fetchTopHeadlines = async (page = currentPage) => {
     setLoading(true);
-    setError(null);
+    setError(null); // Reset error state
     setIsTopHeadlines(true);
     try {
       const response = await axios.get('/api/top-headlines', {
         params: {
-          category: selectedCategory,
-          page: currentPage,
+          category: selectedCategory === 'all' ? '' : selectedCategory, // Use '' for all categories
+          page: page,
           pageSize: itemsPerPage,
         },
       });
       setArticles(response.data.articles || []);
       setTotalItems(response.data.totalResults || 0);
+      setCurrentPage(page);
     } catch (err) {
-      setError('Failed to fetch top headlines');
+      setError('Failed to fetch top headlines. Please try again later.'); // Set error message
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim() && !isTopHeadlines) return;
+  const fetchArticles = async (page = currentPage) => {
+    setLoading(true);
+    setError(null); // Reset error state
+    try {
+      const response = await axios.get(isTopHeadlines ? '/api/top-headlines' : '/api/search', {
+        params: {
+          ...(isTopHeadlines ? { category: selectedCategory === 'all' ? '' : selectedCategory } : { q: searchTerm }),
+          page: page,
+          pageSize: itemsPerPage,
+        },
+      });
+      setArticles(response.data.articles || []);
+      setTotalItems(response.data.totalResults || 0);
+      setCurrentPage(page);
+    } catch (err) {
+      setError(isTopHeadlines ? 'Failed to fetch top headlines. Please try again later.' : 'Failed to fetch search results. Please try again later.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchArticles(1); // Fetch articles whenever the selected category changes
+  }, [selectedCategory, itemsPerPage]); // Dependencies include selectedCategory and itemsPerPage
+
+  const handleSearch = async (page = currentPage) => {
+    if (!searchTerm.trim()) return;
 
     if (!isSignedIn) {
       router.push('/sign-in');
@@ -96,18 +123,20 @@ const NewsAggregator = () => {
     }
 
     setLoading(true);
-    setError(null);
+    setError(null); // Reset error state
     setIsTopHeadlines(false);
     try {
       const response = await axios.get('/api/search', {
         params: {
           q: searchTerm,
-          page: currentPage,
+          page: page,
           pageSize: itemsPerPage,
+          category: selectedCategory === 'all' ? '' : selectedCategory, // Use '' for all categories
         },
       });
       setArticles(response.data.articles || []);
-      setTotalItems(response.data.totalItems || 0);
+      setTotalItems(response.data.totalResults || 0);
+      setCurrentPage(page);
 
       if (searchTerm.trim()) {
         const insightsResponse = await axios.post('/api/ai-insights', { searchTerm, articles: response.data.articles });
@@ -115,7 +144,7 @@ const NewsAggregator = () => {
         setShowAiInsights(true);
       }
     } catch (err) {
-      setError('Failed to fetch search results');
+      setError('Failed to fetch search results. Please try again later.'); // Set error message
       console.error(err);
     } finally {
       setLoading(false);
@@ -128,22 +157,20 @@ const NewsAggregator = () => {
     setCurrentPage(1);
     setShowAiInsights(false);
     setIsTopHeadlines(true);
-    fetchTopHeadlines();
+    fetchTopHeadlines(1);
   };
 
   const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
     if (isTopHeadlines) {
-      fetchTopHeadlines();
+      fetchTopHeadlines(newPage);
     } else {
-      handleSearch();
+      handleSearch(newPage);
     }
   };
 
   const handleCategoryChange = (category) => {
-    setSelectedCategory(category === 'all' ? '' : category);
-    setCurrentPage(1);
-    fetchTopHeadlines();
+    setSelectedCategory(category); // Set the selected category directly
+    setCurrentPage(1); // Reset to the first page
   };
 
   const fetchRecommendations = async (topic) => {
@@ -441,7 +468,10 @@ const NewsAggregator = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                  setItemsPerPage(Number(value));
+                  setCurrentPage(1); // Reset to the first page
+                }}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Items per page" />
                   </SelectTrigger>

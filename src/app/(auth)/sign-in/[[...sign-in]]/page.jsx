@@ -1,4 +1,7 @@
 'use client'
+import { useEffect } from 'react'
+import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 import * as Clerk from '@clerk/elements/common'
 import * as SignIn from '@clerk/elements/sign-in'
 import Link from 'next/link'
@@ -18,6 +21,19 @@ import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
 
 export default function SignInPage() {
+  const { isLoaded, isSignedIn } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push('/dashboard')
+    }
+  }, [isLoaded, isSignedIn, router])
+
+  if (!isLoaded || isSignedIn) {
+    return null // or a loading spinner
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100/50 px-4">
       <SignIn.Root>

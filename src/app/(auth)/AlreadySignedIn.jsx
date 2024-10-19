@@ -35,7 +35,7 @@ export default function AlreadySignedIn() {
             <p className="font-semibold">{user?.primaryEmailAddress?.emailAddress}</p>
             <Button
               className="w-full"
-              onClick={() => router.push('/news')}
+              onClick={() => router.push('/dashboard')}
             >
               Go to News <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

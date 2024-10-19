@@ -69,6 +69,28 @@ export async function combineArticles(articles) {
   }
 }
 
+export async function generateDescription(content) {
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const prompt = `
+    Generate a brief, engaging description for a storyboard based on the following content. 
+    The description should be about 2-3 sentences long and capture the essence of the story:
+
+    ${content}
+
+    Description:
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error("Error generating description with Gemini AI:", error);
+    return "An engaging story awaits. Click to read more!"; // Fallback description
+  }
+}
+
 function parseMarkdown(text) {
   // This function can be expanded to handle more complex markdown parsing if needed
   return text
