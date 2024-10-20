@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Newspaper, Bookmark, Book, BarChart2 } from 'lucide-react';
+import { Newspaper, Bookmark, Book, BarChart2, Scale } from 'lucide-react';
 import Image from 'next/image';
 import { LogOut } from 'lucide-react';
 
@@ -27,6 +27,7 @@ const Dashboard = () => {
     { title: 'Saved Articles', icon: Bookmark, href: '/saved' },
     { title: 'Storyboards', icon: Book, href: '/stories' },
     { title: 'Analytics', icon: BarChart2, href: '/analytics' },
+    { title: 'Scale', icon: Scale, href: '/scale' },
   ];
 
   return (
@@ -113,6 +114,8 @@ function getDescription(title) {
       return 'Create and manage your storyboards';
     case 'Analytics':
       return 'View insights about your activity'; 
+    case 'Scale':
+      return 'Weigh two articles against each other';
     default:
       return '';
   }

@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -15,11 +16,15 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-    <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
-        {children}
-      </body>
-    </html>
+      <html lang="en">
+        <head>
+          <link rel="icon" href="/briefly.png" />
+          <title>Briefly - Get news articles in a nutshell</title>
+        </head>
+        <body className={`${inter.variable} antialiased`}>
+          {children}
+        </body>
+      </html>
     </ClerkProvider>
   );
 }

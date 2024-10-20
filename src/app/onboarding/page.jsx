@@ -6,6 +6,7 @@ import { useUser } from '@clerk/nextjs';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Loader2 } from 'lucide-react';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
