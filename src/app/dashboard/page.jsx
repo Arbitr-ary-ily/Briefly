@@ -1,17 +1,19 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Newspaper, Bookmark, Book, BarChart2 } from 'lucide-react';
 import Image from 'next/image';
+import { LogOut } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useUser();
   const [greeting, setGreeting] = useState('');
+  const {signOut} = useClerk();
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -82,11 +84,19 @@ const Dashboard = () => {
           transition={{ delay: 0.6 }}
           className="mt-12 text-center"
         >
-          <Button asChild size="lg">
-            <Link href="/news">
-              Start Exploring
-            </Link>
-          </Button>
+          <div className="flex flex-col space-y-4">
+            <div className="flex justify-between">
+              <Button asChild size="lg">
+                <Link href="/news">
+                  Start Exploring
+                </Link>
+              </Button>
+              <Button variant="outline" onClick={signOut} size="lg">
+                <LogOut className="h-5 w-5 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
         </motion.div>
       </motion.div>
     </div>
@@ -102,7 +112,7 @@ function getDescription(title) {
     case 'Storyboards':
       return 'Create and manage your storyboards';
     case 'Analytics':
-      return 'View insights about your reading habits';
+      return 'View insights about your activity'; 
     default:
       return '';
   }

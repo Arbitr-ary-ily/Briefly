@@ -19,6 +19,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { trackEvent } from '@/lib/analytics';
+import { useUser } from "@clerk/nextjs";
 
 export default function AdvancedStoryboardEditor() {
   const { uuid } = useParams()
@@ -29,6 +31,7 @@ export default function AdvancedStoryboardEditor() {
   const [publishDate, setPublishDate] = useState(null)
   const [selectedArticles, setSelectedArticles] = useState([])
   const router = useRouter()
+  const { user } = useUser();
 
   useEffect(() => {
     const savedStoryboard = JSON.parse(localStorage.getItem(`storyboard-${uuid}`)) || { title: 'Untitled Storyboard', sections: [] }
@@ -92,6 +95,7 @@ export default function AdvancedStoryboardEditor() {
       if (!response.ok) {
         throw new Error('Failed to publish storyboard');
       }
+      
 
       const { slug } = await response.json();
       setPublishDate(new Date().toLocaleString());
@@ -102,6 +106,8 @@ export default function AdvancedStoryboardEditor() {
       
       // Redirect to the public story page
       router.push(`/story/${slug}`);
+      // Track the event after successful publication
+      await trackEvent(user.id, 'storyboard_created', { title, sectionCount: sections.length });
     } catch (error) {
       console.error('Error publishing story:', error);
       toast({

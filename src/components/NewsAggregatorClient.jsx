@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Newspaper, Search, RefreshCw, AlertCircle, Bot, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Newspaper, Search, RefreshCw, AlertCircle, Bot, X, ChevronLeft, ChevronRight, Home } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,6 +26,7 @@ import { SiGooglegemini } from "react-icons/si";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import StoryboardSidebar from './StoryboardSidebar';
+import { trackEvent } from '@/lib/analytics';
 
 const categories = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];
 
@@ -123,7 +124,7 @@ const NewsAggregator = () => {
     }
 
     setLoading(true);
-    setError(null); // Reset error state
+    setError(null);
     setIsTopHeadlines(false);
     try {
       const response = await axios.get('/api/search', {
@@ -131,20 +132,23 @@ const NewsAggregator = () => {
           q: searchTerm,
           page: page,
           pageSize: itemsPerPage,
-          category: selectedCategory === 'all' ? '' : selectedCategory, // Use '' for all categories
+          category: selectedCategory === 'all' ? '' : selectedCategory,
         },
       });
-      setArticles(response.data.articles || []);
+
+      // Ensure response.data.articles is an array
+      const articlesData = Array.isArray(response.data.articles) ? response.data.articles : [];
+      setArticles(articlesData);
       setTotalItems(response.data.totalResults || 0);
       setCurrentPage(page);
 
       if (searchTerm.trim()) {
-        const insightsResponse = await axios.post('/api/ai-insights', { searchTerm, articles: response.data.articles });
+        const insightsResponse = await axios.post('/api/ai-insights', { searchTerm, articles: articlesData });
         setAiInsights(insightsResponse.data.insights);
         setShowAiInsights(true);
       }
     } catch (err) {
-      setError('Failed to fetch search results. Please try again later.'); // Set error message
+      setError('Failed to fetch search results. Please try again later.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -341,6 +345,79 @@ const NewsAggregator = () => {
     setIsSidebarOpen(true);
   }, []);
 
+  const renderArticles = () => {
+    if (error) {
+      return (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      );
+    }
+
+    if (loading) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(itemsPerPage)].map((_, index) => (
+            <Card key={index} className="flex flex-col h-full">
+              <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-1/4 mb-2" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+              <CardFooter className="flex justify-between items-center">
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-8 w-24" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
+    // Log articles before rendering
+    console.log('Articles to render:', articles);
+
+    return (
+      <AnimatePresence>
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ staggerChildren: 0.1 }}
+        >
+          {articles.length > 0 ? (
+            articles.map((article, index) => {
+              // Ensure article is a valid object
+              if (typeof article !== 'object' || article === null) {
+                console.error('Invalid article object:', article);
+                return null; // Skip rendering this article
+              }
+              return (
+                <motion.div
+                  key={article.url || index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <ArticleCard article={article} onSelect={handleArticleSelect} />
+                </motion.div>
+              );
+            })
+          ) : (
+            <p>No articles found.</p>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    );
+  };
+
   if (!isLoaded || !isSignedIn) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -361,8 +438,8 @@ const NewsAggregator = () => {
             className="text-3xl font-bold flex items-center mt-1"
             whileHover={{ scale: 1.05 }}
           >
-            <Image src="/logo.svg" alt="Briefly" className="mr-2 cursor-pointer" width='200' height='500' onClick={() => window.location.reload()} />
-          </motion.h1>
+              <Image src="/logo.svg" alt="Logo" width={275} height={50} className="" />
+              </motion.h1>
           <div className="flex items-center space-x-4">
             <div className="flex w-full sm:w-auto space-x-2">
               <div className="relative w-full">
@@ -371,8 +448,8 @@ const NewsAggregator = () => {
                   placeholder="Search news..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  onFocus={() => setIsInputFocused(true)} // Set focus state to true
-                  onBlur={() => setIsInputFocused(false)} // Set focus state to false
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
                   className="flex-grow"
                 />
                 <AnimatePresence>
@@ -438,6 +515,10 @@ const NewsAggregator = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              <Button variant="outline" onClick={() => router.push('/dashboard')}>
+                <Home className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
             </div>
             <UserButton afterSignOutUrl="/" />
           </div>
@@ -515,61 +596,7 @@ const NewsAggregator = () => {
               </motion.div>
             )}
 
-            {loading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(itemsPerPage)].map((_, index) => (
-                  <Card key={index} className="flex flex-col h-full">
-                    <CardHeader>
-                      <Skeleton className="h-6 w-3/4" />
-                    </CardHeader>
-                    <CardContent>
-                      <Skeleton className="h-4 w-1/4 mb-2" />
-                      <Skeleton className="h-4 w-full mb-2" />
-                      <Skeleton className="h-4 w-full mb-2" />
-                      <Skeleton className="h-4 w-2/3" />
-                    </CardContent>
-                    <CardFooter className="flex justify-between items-center">
-                      <Skeleton className="h-6 w-16" />
-                      <Skeleton className="h-8 w-24" />
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            )}
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {!loading && !error && (
-              <AnimatePresence>
-                <motion.div 
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ staggerChildren: 0.1 }}
-                >
-                  {articles && articles.length > 0 ? (
-                    articles.map((article, index) => (
-                      <motion.div
-                        key={article.url || index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ delay: index * 0.1 }}
-                      >
-                        <ArticleCard article={article} onSelect={handleArticleSelect} />
-                      </motion.div>))
-                  ) : (
-                    <p>No articles found.</p>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            )}
+            {renderArticles()} {/* Call the new render function here */}
 
             {totalItems > itemsPerPage && (
               <motion.div 

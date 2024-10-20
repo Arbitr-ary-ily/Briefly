@@ -1,55 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2 } from "lucide-react";
 
-const ArticleSelector = ({ articles, onCreateStoryboard }) => {
-  const [selectedArticles, setSelectedArticles] = useState([]);
+const ArticleSelector = ({ onSelect, selectedArticle }) => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const toggleArticleSelection = (article) => {
-    setSelectedArticles(prev => 
-      prev.some(a => a.url === article.url)
-        ? prev.filter(a => a.url !== article.url)
-        : [...prev, article]
-    );
-  };
+  useEffect(() => {
+    fetchArticles();
+  }, []);
 
-  const handleCreateStoryboard = () => {
-    if (selectedArticles.length > 0) {
-      onCreateStoryboard(selectedArticles);
-      setSelectedArticles([]);
+  const fetchArticles = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/news?q=' + searchTerm);
+      const data = await response.json();
+      setArticles(data.articles);
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Select Articles for Storyboard</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {articles.map((article) => (
-          <Card key={article.url} className="flex flex-col">
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  checked={selectedArticles.some(a => a.url === article.url)}
-                  onCheckedChange={() => toggleArticleSelection(article)}
-                />
-                <CardTitle className="text-sm">{article.title}</CardTitle>
+    <Card>
+      <CardHeader>
+        <CardTitle>Select an Article</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex space-x-2 mb-4">
+          <Input
+            placeholder="Search articles..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <Button onClick={fetchArticles}>Search</Button>
+        </div>
+        {loading ? (
+          <div className="flex justify-center">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : (
+          <ScrollArea className="h-[400px]">
+            {articles.map((article) => (
+              <div
+                key={article.url}
+                className={`p-2 cursor-pointer rounded-md hover:bg-gray-100 ${
+                  selectedArticle?.url === article.url ? 'bg-yellow-100' : ''
+                }`}
+                onClick={() => onSelect(article)}
+              >
+                <h3 className="font-semibold">{article.title}</h3>
+                <p className="text-sm text-gray-600">{article.description}</p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs">{article.description}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <Button 
-        onClick={handleCreateStoryboard} 
-        className="mt-4"
-        disabled={selectedArticles.length === 0}
-      >
-        Create Storyboard
-      </Button>
-    </div>
+            ))}
+          </ScrollArea>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
