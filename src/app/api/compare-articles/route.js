@@ -27,23 +27,23 @@ export async function POST(req) {
       6. Overall impact and significance of each article
 
       Format your response using the following HTML structure:
-      <div class="comparison-result">
-        <h2>Article Comparison Analysis</h2>
+      <div class="comparison-result" style="padding: 16px; background-color: white; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); border-radius: 8px;">
+        <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 16px;">Article Comparison Analysis</h2>
         
-        <section class="themes">
-          <h3>Main Themes and Topics</h3>
-          <div class="article-comparison">
-            <div class="article1">
-              <h4>Article 1: ${article1.title}</h4>
-              <ul style="margin-left: 20px;"> <!-- Added margin left for listed items -->
+        <section class="themes" style="margin-bottom: 24px;">
+          <h3 style="font-size: 20px; font-weight: semi-bold; margin-bottom: 8px;">Main Themes and Topics</h3>
+          <div class="article-comparison" style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+            <div class="article1" style="padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <h4 style="font-size: 18px; font-weight: medium;">Article 1: ${article1.title}</h4>
+              <ul style="list-style-type: disc; padding-left: 20px; margin-top: 8px;">
                 <li>[Theme 1]</li>
                 <li>[Theme 2]</li>
                 ...
               </ul>
             </div>
-            <div class="article2">
-              <h4>Article 2: ${article2.title}</h4>
-              <ul style="margin-left: 20px;"> <!-- Added margin left for listed items -->
+            <div class="article2" style="padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <h4 style="font-size: 18px; font-weight: medium;">Article 2: ${article2.title}</h4>
+              <ul style="list-style-type: disc; padding-left: 20px; margin-top: 8px;">
                 <li>[Theme 1]</li>
                 <li>[Theme 2]</li>
                 ...
@@ -52,66 +52,66 @@ export async function POST(req) {
           </div>
         </section>
 
-        <section class="similarities-differences">
-          <h3>Similarities and Differences</h3>
-          <h4>Similarities</h4>
-          <ul style="margin-left: 20px;"> <!-- Added margin left for listed items -->
+        <section class="similarities-differences" style="margin-bottom: 24px;">
+          <h3 style="font-size: 20px; font-weight: semi-bold; margin-bottom: 8px;">Similarities and Differences</h3>
+          <h4 style="font-weight: medium;">Similarities</h4>
+          <ul style="list-style-type: disc; padding-left: 20px; margin-top: 8px;">
             <li>[Similarity 1]</li>
             <li>[Similarity 2]</li>
             ...
           </ul>
-          <h4>Differences</h4>
-          <ul style="margin-left: 20px;"> <!-- Added margin left for listed items -->
+          <h4 style="font-weight: medium; margin-top: 16px;">Differences</h4>
+          <ul style="list-style-type: disc; padding-left: 20px; margin-top: 8px;">
             <li>[Difference 1]</li>
             <li>[Difference 2]</li>
             ...
           </ul>
         </section>
 
-        <section class="bias-analysis">
-          <h3>Bias Analysis</h3>
-          <div class="article-comparison">
-            <div class="article1">
-              <h4>Article 1</h4>
+        <section class="bias-analysis" style="margin-bottom: 24px;">
+          <h3 style="font-size: 20px; font-weight: semi-bold; margin-bottom: 8px;">Bias Analysis</h3>
+          <div class="article-comparison" style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+            <div class="article1" style="padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <h4 style="font-size: 18px; font-weight: medium;">Article 1</h4>
               <p>[Bias analysis for Article 1]</p>
             </div>
-            <div class="article2">
-              <h4>Article 2</h4>
+            <div class="article2" style="padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <h4 style="font-size: 18px; font-weight: medium;">Article 2</h4>
               <p>[Bias analysis for Article 2]</p>
             </div>
           </div>
         </section>
 
-        <section class="credibility">
-          <h3>Credibility and Sources</h3>
-          <div class="article-comparison">
-            <div class="article1">
-              <h4>Article 1</h4>
+        <section class="credibility" style="margin-bottom: 24px;">
+          <h3 style="font-size: 20px; font-weight: semi-bold; margin-bottom: 8px;">Credibility and Sources</h3>
+          <div class="article-comparison" style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+            <div class="article1" style="padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <h4 style="font-size: 18px; font-weight: medium;">Article 1</h4>
               <p>[Credibility analysis for Article 1]</p>
             </div>
-            <div class="article2">
-              <h4>Article 2</h4>
+            <div class="article2" style="padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <h4 style="font-size: 18px; font-weight: medium;">Article 2</h4>
               <p>[Credibility analysis for Article 2]</p>
             </div>
           </div>
         </section>
 
-        <section class="writing-style">
-          <h3>Writing Style and Tone</h3>
-          <div class="article-comparison">
-            <div class="article1">
-              <h4>Article 1</h4>
+        <section class="writing-style" style="margin-bottom: 24px;">
+          <h3 style="font-size: 20px; font-weight: semi-bold; margin-bottom: 8px;">Writing Style and Tone</h3>
+          <div class="article-comparison" style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+            <div class="article1" style="padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <h4 style="font-size: 18px; font-weight: medium;">Article 1</h4>
               <p>[Writing style and tone analysis for Article 1]</p>
             </div>
-            <div class="article2">
-              <h4>Article 2</h4>
+            <div class="article2" style="padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <h4 style="font-size: 18px; font-weight: medium;">Article 2</h4>
               <p>[Writing style and tone analysis for Article 2]</p>
             </div>
           </div>
         </section>
 
-        <section class="impact">
-          <h3>Overall Impact and Significance</h3>
+        <section class="impact" style="margin-bottom: 24px;">
+          <h3 style="font-size: 20px; font-weight: semi-bold; margin-bottom: 8px;">Overall Impact and Significance</h3>
           <p>[Analysis of the overall impact and significance of both articles]</p>
         </section>
       </div>

@@ -77,7 +77,7 @@ export default function ScalePage() {
   return (
     <div className="container mx-auto p-4">
         <Image src="/logo.svg" alt="Logo" className="mb-6 mt-6" width={275} height={100}></Image>
-      <h1 className="text-3xl font-bold mb-6">Article Comparison Scale</h1>
+      <h1 className="text-5xl font-bold mb-6">The Scale</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ArticleSelector onSelect={setArticle1} selectedArticle={article1} />
         <ArticleSelector onSelect={setArticle2} selectedArticle={article2} />
@@ -95,7 +95,7 @@ export default function ScalePage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Comparison Results</CardTitle>
+              <CardTitle className="text-2xl font-bold">Results</CardTitle>
             </CardHeader>
             <CardContent>
               <div dangerouslySetInnerHTML={{ __html: comparison }} />

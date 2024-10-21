@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import Link from 'next/link'
@@ -9,7 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Mic, MessageCircle, ExternalLink, Share2, AlertTriangle, Scale, ChevronDown, ChevronUp, Info, Calendar, Save } from "lucide-react"
+import { Mic, MessageCircle, ExternalLink, Share2, AlertTriangle, Scale, ChevronDown, ChevronUp, Info, Calendar, Save, Smile, Frown, Meh } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
 import { Progress } from "@/components/ui/progress"
@@ -27,6 +27,8 @@ const ArticleCard = ({ article, isSelected, onSelect }) => {
   const [isBiasMeterVisible, setIsBiasMeterVisible] = useState(false)
   const { toast } = useToast()
   const [isHoveringButton, setIsHoveringButton] = useState(false)
+  const [sentiment, setSentiment] = useState(null);
+  const [isAnalyzingSentiment, setIsAnalyzingSentiment] = useState(false);
 
   const handleMouseEnter = () => {
     setIsHoveringButton(true)
@@ -199,6 +201,42 @@ const ArticleCard = ({ article, isSelected, onSelect }) => {
       toast({ title: "Already Saved", description: "This article is already in your collection." });
     }
   };
+
+  // const analyzeSentiment = async () => {
+  //   if (!article.description) {
+  //     toast({
+  //       title: "Cannot analyze sentiment",
+  //       description: "No content provided for sentiment analysis.",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
+
+  //   setIsAnalyzingSentiment(true);
+  //   try {
+  //     // const response = await axios.post('/api/analyze-sentiment', { text: article.description });
+  //     setSentiment(response.data);
+  //   } catch (error) {
+  //     console.error('Error analyzing sentiment:', error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to analyze sentiment. Please try again later.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setIsAnalyzingSentiment(false);
+  //   }
+  // };
+
+  // const SentimentIcon = sentiment ? {
+  //   'positive': Smile,
+  //   'negative': Frown,
+  //   'neutral': Meh
+  // }[sentiment.sentiment] || Meh : null;
+
+  // useEffect(() => {
+  //   analyzeSentiment();
+  // }, [article.description]);
 
   return (
     <motion.div

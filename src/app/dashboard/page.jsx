@@ -6,14 +6,16 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Newspaper, Bookmark, Book, BarChart2, Scale } from 'lucide-react';
+import { Newspaper, Bookmark, Book, BarChart2, Scale, FileText, Loader2 } from 'lucide-react'; // Added FileText icon for resources
 import Image from 'next/image';
 import { LogOut } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useUser();
   const [greeting, setGreeting] = useState('');
-  const {signOut} = useClerk();
+  const { signOut } = useClerk();
+  const [loading, setLoading] = useState(false); // Added loading state
+  const [loadingHref, setLoadingHref] = useState(null); // Track which card is loading
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -28,7 +30,17 @@ const Dashboard = () => {
     { title: 'Storyboards', icon: Book, href: '/stories' },
     { title: 'Analytics', icon: BarChart2, href: '/analytics' },
     { title: 'Scale', icon: Scale, href: '/scale' },
+    { title: 'Resources', icon: FileText, href: '/resources' }, // Added resources page
   ];
+
+  const handleCardClick = (href) => {
+    setLoading(true); // Set loading to true when a card is clicked
+    setLoadingHref(href); // Track the href of the loading card
+    // Simulate loading time (replace with actual navigation logic)
+    setTimeout(() => {
+      window.location.href = href; // Navigate to the new page
+    }, 1000); // Adjust the timeout as needed
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 p-8">
@@ -62,8 +74,8 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Link href={item.href}>
-                <Card className="hover:bg-accent transition-colors duration-300">
+              <div onClick={() => handleCardClick(item.href)}> {/* Updated to handle click */}
+                <Card className="hover:bg-accent transition-colors duration-300 relative">
                   <CardContent className="flex items-center p-6">
                     <item.icon className="h-8 w-8 mr-4 text-primary" />
                     <div>
@@ -73,8 +85,13 @@ const Dashboard = () => {
                       </p>
                     </div>
                   </CardContent>
+                  {loading && loadingHref === item.href && ( // Show loader on the card if it's loading
+                    <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75">
+                      <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                    </div>
+                  )}
                 </Card>
-              </Link>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -116,6 +133,8 @@ function getDescription(title) {
       return 'View insights about your activity'; 
     case 'Scale':
       return 'Weigh two articles against each other';
+    case 'Resources': 
+      return 'Find helpful resources and guides';
     default:
       return '';
   }

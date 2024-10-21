@@ -435,11 +435,12 @@ const NewsAggregator = () => {
       <div className="container mx-auto px-4 py-8 relative">
         <header className="flex flex-col sm:flex-row items-center justify-between mb-8 space-y-4 sm:space-y-0">
           <motion.h1 
-            className="text-3xl font-bold flex items-center mt-1"
+            className="text-3xl font-bold flex items-center mt-1 cursor-pointer" // Added cursor-pointer class
             whileHover={{ scale: 1.05 }}
+            onClick={() => window.location.reload()} // Refresh the page on click
           >
               <Image src="/logo.svg" alt="Logo" width={275} height={50} className="" />
-              </motion.h1>
+          </motion.h1>
           <div className="flex items-center space-x-4">
             <div className="flex w-full sm:w-auto space-x-2">
               <div className="relative w-full">
