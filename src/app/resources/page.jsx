@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import Image from 'next/image'
+import Link from 'next/link';
 const categories = [
   "News Sources",
   "Fact-Checking",
@@ -136,8 +137,10 @@ export default function ConsolidatedNewsResources() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <Image src="/logo.svg" alt="Logo" width={275} height={100} />
-        <h1 className="text-5xl font-bold mb-6 mt-6">News and Journalism Resources</h1>
+        <Link href="/dashboard">
+          <Image src="/logo.svg" alt="Logo" width={275} height={100} />
+        </Link>
+        <h1 className="text-5xl font-bold mb-6 mt-6">Resources</h1>
         
         <div className="relative mb-8">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />

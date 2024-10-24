@@ -6,6 +6,7 @@ import { getUserAnalytics } from '@/lib/analytics';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AnalyticsPage() {
   const { user } = useUser();
@@ -36,9 +37,11 @@ export default function AnalyticsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-                      <Image src="/logo.svg" alt="Logo" width={275} height={50} className="mb-8" />
+      <Link href="/dashboard">
+        <Image src="/logo.svg" alt="Logo" width={275} height={50} className="mb-8" />
+      </Link>
 
-      <h1 className="text-3xl font-bold mb-6">Your Analytics</h1>
+      <h1 className="text-5xl font-bold mb-6">Your Analytics</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>

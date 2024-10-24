@@ -27,6 +27,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import StoryboardSidebar from './StoryboardSidebar';
 import { trackEvent } from '@/lib/analytics';
+import Link from 'next/link';
 
 const categories = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];
 
@@ -437,9 +438,11 @@ const NewsAggregator = () => {
           <motion.h1 
             className="text-3xl font-bold flex items-center mt-1 cursor-pointer" // Added cursor-pointer class
             whileHover={{ scale: 1.05 }}
-            onClick={() => window.location.reload()} // Refresh the page on click
+            // onClick={() => window.location.reload()} // Refresh the page on click
           >
-              <Image src="/logo.svg" alt="Logo" width={275} height={50} className="" />
+              <Link href="/dashboard">
+                <Image src="/logo.svg" alt="Logo" width={275} height={50} className="" />
+              </Link>
           </motion.h1>
           <div className="flex items-center space-x-4">
             <div className="flex w-full sm:w-auto space-x-2">

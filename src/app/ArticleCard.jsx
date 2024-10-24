@@ -332,7 +332,7 @@ const ArticleCard = ({ article, isSelected, onSelect }) => {
               <TooltipProvider>
               <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant={isSpeaking ? "secondary" : "outline"} size="icon" onClick={handleTextToSpeech}>
+                    <Button variant={isSpeaking ? "secondary" : "outline"} size="icon" onClick={handleTextToSpeech} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                       <Mic className="h-4 w-4" />
                       <span className="sr-only">{isSpeaking ? 'Stop Reading' : 'Text-to-Speech'}</span>
                     </Button>

@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
 import Image from 'next/image';
 import ArticleSelector from '@/components/ArticleSelector';
-
+import Link from 'next/link';
 export default function ScalePage() {
   const [article1, setArticle1] = useState(null);
   const [article2, setArticle2] = useState(null);
@@ -76,8 +76,10 @@ export default function ScalePage() {
 
   return (
     <div className="container mx-auto p-4">
+      <Link href="/dashboard">
         <Image src="/logo.svg" alt="Logo" className="mb-6 mt-6" width={275} height={100}></Image>
-      <h1 className="text-5xl font-bold mb-6">The Scale</h1>
+      </Link>
+      <h1 className="text-5xl font-bold mb-6">Scale</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ArticleSelector onSelect={setArticle1} selectedArticle={article1} />
         <ArticleSelector onSelect={setArticle2} selectedArticle={article2} />

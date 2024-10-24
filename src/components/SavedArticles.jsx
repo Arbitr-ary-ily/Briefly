@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import Image from 'next/image';
+import Link from 'next/link';
 
 const SavedArticles = () => {
   const [savedArticles, setSavedArticles] = useState([]);
@@ -30,9 +31,11 @@ const SavedArticles = () => {
   return (
     <TooltipProvider>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Image src="/logo.svg" alt="Logo" width={275} height={50} className="mb-8 mx-auto" />
+        <Link href="/dashboard">
+          <Image src="/logo.svg" alt="Logo" width={275} height={50} className="mb-8 mx-auto" />
+        </Link>
 
-        <h1 className="text-4xl font-bold mb-6 text-center text-gray-800">Saved Articles</h1>
+        <h1 className="text-5xl font-bold mb-6 text-center text-gray-800">Saved Articles</h1>
         
         <div className="relative mb-6">
           <Input
