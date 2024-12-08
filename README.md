@@ -43,7 +43,7 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ### Supabase Configuration
-*(Placeholder for future Supabase setup)*
+*(Supabase setup)*
 
 ### Optional: News API
 ```bash
